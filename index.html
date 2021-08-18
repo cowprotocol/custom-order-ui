@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <title>MetaMask Experiments</title>
+  </head>
+
+  <body>
+    <form>
+      <input type="button" id="connect" value="Connect">
+      <input type="button" id="sign" value="Sign">
+    </form>
+
+    <form>
+      <div>
+        <label for="sellToken">Sell Token</label>
+        <input type="text" id="sellToken" value="0x0000000000000000000000000000000000000000">
+      </div>
+      <div>
+        <label for="buyToken">Buy Token</label>
+        <input type="text" id="buyToken" value="0x0000000000000000000000000000000000000000">
+      </div>
+      <div>
+        <label for="receiver">Receiver</label>
+        <input type="text" id="receiver" value="0x0000000000000000000000000000000000000000">
+      </div>
+      <div>
+        <label for="sellAmount">Sell Amount</label>
+        <input type="text" id="sellAmount" value="1234567890">
+      </div>
+      <div>
+        <label for="buyAmount">BuyAmount</label>
+        <input type="text" id="buyAmount" value="1234567890">
+      </div>
+      <div>
+        <label for="validTo">Valid To</label>
+        <input type="text" id="validTo" value="2147483648">
+      </div>
+      <div>
+        <label for="appData">App Data</label>
+        <input type="text" id="appData" value="0x0000000000000000000000000000000000000000000000000000000000000000">
+      </div>
+      <div>
+        <label for="feeAmount">Fee Amount</label>
+        <input type="text" id="feeAmount" value="1234567890">
+      </div>
+      <div>
+        <label for="kind">Kind</label>
+        <input type="text" id="kind" value="sell">
+      </div>
+      <div>
+        <label for="partiallyFillable">Partially Fillable</label>
+        <input type="checkbox" id="partiallyFillable" value=false>
+      </div>
+      <div>
+        <label for="sellTokenBalance">Sell Token Balance</label>
+        <input type="text" id="sellTokenBalance" value="erc20">
+      </div>
+      <div>
+        <label for="buyTokenBalance">Sell Token Balance</label>
+        <input type="text" id="buyTokenBalance" value="erc20">
+      </div>
+    </form>
+
+    <span id="signature"></span>
+
+    <script src="lib/ethers.js"></script>
+    <script src="index.js"></script>
+  </body>
+</html>
