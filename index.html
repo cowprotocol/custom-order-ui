@@ -3,7 +3,17 @@
   <head>
     <meta charset="utf-8">
 
-    <title>MetaMask Experiments</title>
+    <title>Custom Order</title>
+    <style>
+      #order label {
+        display: inline-block;
+        width: 10em;
+      }
+      #order input[type=text] {
+        display: inline-block;
+        width: 42em;
+      }
+    </style>
   </head>
 
   <body>
@@ -12,7 +22,7 @@
       <input type="button" id="sign" value="Sign">
     </form>
 
-    <form>
+    <form id="order">
       <div>
         <label for="sellToken">Sell Token</label>
         <input type="text" id="sellToken" value="0x0000000000000000000000000000000000000000">
@@ -62,8 +72,6 @@
         <input type="text" id="buyTokenBalance" value="erc20">
       </div>
     </form>
-
-    <span id="signature"></span>
 
     <script src="lib/ethers.js"></script>
     <script src="index.js"></script>
