@@ -1,3 +1,5 @@
+import { Web3Provider } from "@ethersproject/providers";
+
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 const signer = provider.getSigner();
 const settlement = new ethers.Contract(
