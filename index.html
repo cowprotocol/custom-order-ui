@@ -11,17 +11,23 @@
       }
       #order input[type=text] {
         display: inline-block;
+        box-sizing: border-box;
         width: 42em;
+      }
+      #order select {
+        display: inline-block;
+        box-sizing: border-box;
+        width: 42em;
+      }
+      #sign {
+        margin-top: 1em;
+        margin-left: 48em;
+        width: 6.4em;
       }
     </style>
   </head>
 
   <body>
-    <form>
-      <input type="button" id="connect" value="Connect">
-      <input type="button" id="sign" value="Sign">
-    </form>
-
     <form id="order">
       <div>
         <label for="sellToken">Sell Token</label>
@@ -57,7 +63,10 @@
       </div>
       <div>
         <label for="kind">Kind</label>
-        <input type="text" id="kind" value="sell">
+        <select id="kind">
+          <option value="sell" selected>sell</option>
+          <option value="buy">buy</option>
+        </select>
       </div>
       <div>
         <label for="partiallyFillable">Partially Fillable</label>
@@ -65,12 +74,28 @@
       </div>
       <div>
         <label for="sellTokenBalance">Sell Token Balance</label>
-        <input type="text" id="sellTokenBalance" value="erc20">
+        <select id="sellTokenBalance">
+          <option value="erc20" selected>erc20</option>
+          <option value="external">external</option>
+          <option value="internal">internal</option>
+        </select>
       </div>
       <div>
         <label for="buyTokenBalance">Sell Token Balance</label>
-        <input type="text" id="buyTokenBalance" value="erc20">
+        <select id="buyTokenBalance">
+          <option value="erc20" selected>erc20</option>
+          <option value="internal">internal</option>
+        </select>
       </div>
+      <div>
+        <label for="signingScheme">Signing Scheme</label>
+        <select id="signingScheme">
+          <option value="eip712" selected>eip712</option>
+          <option value="ethsign">ethsign</option>
+          <option value="presign">presign</option>
+        </select>
+      </div>
+      <input type="button" id="sign" value="Sign">
     </form>
 
     <script src="lib/ethers.js"></script>
