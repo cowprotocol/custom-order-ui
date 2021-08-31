@@ -116,25 +116,12 @@ document.querySelector("#sign").addEventListener(
     if (!response.ok) {
       throw new Error(body.description);
     }
+    const orderUid = body;
 
     if (signingScheme === "presign") {
-      await settlement.setPreSignature(
-        ethers.utils.solidityPack(
-          ["bytes32", "address", "uint32"],
-          [
-            ethers.utils._TypedDataEncoder.hash(
-              domain,
-              { Order: ORDER_TYPE },
-              order,
-            ),
-            await signer.getAddress(),
-            order.validTo,
-          ],
-        ),
-        true,
-      );
+      await settlement.setPreSignature(orderUid, true);
     }
 
-    alert(`https://protocol-explorer.dev.gnosisdev.com/orders/${body}`);
+    alert(`https://protocol-explorer.dev.gnosisdev.com/orders/${orderUid}`);
   }),
 );
