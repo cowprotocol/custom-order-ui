@@ -18,6 +18,22 @@ function handleError(inner) {
     });
 }
 
+function parseQuery(q) {
+  const pairs = (q[0] === "?" ? q.substr(1) : q).split("&");
+  const query = {};
+  for (const pair of pairs) {
+    const [key, value] = pair.split("=");
+    query[decodeURIComponent(key)] = decodeURIComponent(value || "");
+  }
+  return query;
+}
+
+function orderbookUrl(network) {
+  const { orderbook } = parseQuery(window.location.search);
+  const baseUrl = orderbook || `https://protocol-${network}.dev.gnosisdev.com`;
+  return `${baseUrl}/api/v1/orders`;
+}
+
 const ORDER_TYPE = [
   { name: "sellToken", type: "address" },
   { name: "buyToken", type: "address" },
@@ -98,7 +114,7 @@ document.querySelector("#sign").addEventListener(
     }
 
     const response = await fetch(
-      `https://protocol-${network}.dev.gnosisdev.com/api/v1/orders`,
+      orderbookUrl(network),
       {
         method: "POST",
         headers: {
