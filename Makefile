@@ -7,7 +7,7 @@ dist/index.js: src/index.js src/lib/ethers.js
 
 .PHONY: host
 host: dist/index.html
-	(cd dist; python3 -m http.server)
+	(cd dist; python3 -m http.server --bind localhost)
 
 .PHONY: ipfs
 ipfs: dist/index.html
