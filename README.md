@@ -1,6 +1,6 @@
-# Gnosis Protocol V2 Custom Orders
+# CoW Protocol Custom Orders
 
-A tiny static HTML page for placing custom GPv2 orders with MetaMask.
+A tiny static HTML page for placing custom CoW Protocol orders with MetaMask.
 
 ## Building
 
