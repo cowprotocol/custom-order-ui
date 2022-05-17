@@ -53,6 +53,7 @@ function orderbookUrl(network, path) {
   return `${baseUrl}/api/${path}`;
 }
 
+// Only add properties which get hashed for the signature
 function readOrder() {
   return {
     sellToken: document.querySelector("#sellToken").value,
@@ -70,6 +71,7 @@ function readOrder() {
   };
 }
 
+// Only add properties which get hashed for the signature
 const ORDER_TYPE = [
   { name: "sellToken", type: "address" },
   { name: "buyToken", type: "address" },
@@ -160,6 +162,7 @@ document.querySelector("#quote").addEventListener(
         ...order,
         ...swapAmount,
         from: await signer.getAddress(),
+        isLiquidityOrder: document.querySelector("#isLiquidityOrder").checked ? true : undefined,
       }),
     });
 
@@ -226,6 +229,7 @@ document.querySelector("#sign").addEventListener(
           signature,
           signingScheme,
           from: await signer.getAddress(),
+          isLiquidityOrder: document.querySelector("#isLiquidityOrder").checked ? true : undefined,
         }),
       },
     );
