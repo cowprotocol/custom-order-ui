@@ -28,10 +28,46 @@ function parseQuery(q) {
   return query;
 }
 
-function orderbookUrl(network) {
+function orderbookUrl(network, path) {
   const { orderbook } = parseQuery(window.location.search);
-  const baseUrl = orderbook || `https://protocol-${network}.dev.gnosisdev.com`;
-  return `${baseUrl}/api/v1/orders`;
+  let baseUrl;
+  switch (orderbook || "barn") {
+    case "prod":
+    case "production":
+      baseUrl = `https://api.cow.fi/${network}`;
+      break;
+    case "barn":
+    case "dev":
+    case "staging":
+      baseUrl = `https://barn.api.cow.fi/${network}`;
+      break;
+    case "local":
+    case "localhost":
+      baseUrl = "http://localhost:8080";
+      break;
+    default:
+      baseUrl = orderbook;
+      break;
+  }
+  console.log(baseUrl);
+  return `${baseUrl}/api/${path}`;
+}
+
+function readOrder() {
+  return {
+    sellToken: document.querySelector("#sellToken").value,
+    buyToken: document.querySelector("#buyToken").value,
+    receiver: document.querySelector("#receiver").value,
+    sellAmount: document.querySelector("#sellAmount").value,
+    buyAmount: document.querySelector("#buyAmount").value,
+    validTo: parseInt(document.querySelector("#validTo").value),
+    appData: document.querySelector("#appData").value,
+    feeAmount: document.querySelector("#feeAmount").value,
+    kind: document.querySelector("#kind").value,
+    partiallyFillable: document.querySelector("#partiallyFillable").checked,
+    sellTokenBalance: document.querySelector("#sellTokenBalance").value,
+    buyTokenBalance: document.querySelector("#buyTokenBalance").value,
+  };
 }
 
 const ORDER_TYPE = [
@@ -55,16 +91,94 @@ const NETWORKS = {
   100: "xdai",
 };
 
+async function init() {
+  await ethereum.request({ method: "eth_requestAccounts" });
+
+  const { chainId } = await provider.getNetwork();
+  const network = NETWORKS[chainId];
+  if (network === undefined) {
+    throw new Error(`unsupported network ${chainId}`);
+  }
+
+  return {
+    chainId,
+    network,
+  };
+}
+
+document.querySelector("#nowish").addEventListener(
+  "click",
+  handleError(() => {
+    const now = ~~(Date.now() / 1000);
+    const nowish = now + 20 * 60; // 20 minutes expiry
+
+    document.querySelector("#validTo").value = `${nowish}`;
+  }),
+);
+
+document.querySelector("#randapp").addEventListener(
+  "click",
+  handleError(() => {
+    const bytes = new Uint8Array(32);
+    window.crypto.getRandomValues(bytes);
+    const hex = [...bytes]
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("");
+
+    document.querySelector("#appData").value = `0x${hex}`;
+  }),
+);
+
+document.querySelector("#quote").addEventListener(
+  "click",
+  handleError(async () => {
+    const { network } = await init();
+
+    const { sellAmount, buyAmount, feeAmount, ...order } = readOrder();
+    let swapAmount;
+    switch (order.kind) {
+      case "sell":
+        swapAmount = {
+          sellAmountBeforeFee: `${BigInt(sellAmount) + BigInt(feeAmount)}`,
+        };
+        break;
+      case "buy":
+        swapAmount = {
+          buyAmountAfterFee: buyAmount,
+        };
+        break;
+      default:
+        throw new Error(`unsupported order kind ${order.kind}`);
+    }
+
+    const response = await fetch(orderbookUrl(network, "v1/quote"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...order,
+        ...swapAmount,
+        from: await signer.getAddress(),
+      }),
+    });
+
+    const body = await response.json();
+    if (!response.ok) {
+      throw new Error(body.description);
+    }
+
+    const { quote } = body;
+    document.querySelector("#sellAmount").value = quote.sellAmount;
+    document.querySelector("#buyAmount").value = quote.buyAmount;
+    document.querySelector("#feeAmount").value = quote.feeAmount;
+  }),
+);
+
 document.querySelector("#sign").addEventListener(
   "click",
   handleError(async () => {
-    await ethereum.request({ method: "eth_requestAccounts" });
-
-    const { chainId } = await provider.getNetwork();
-    const network = NETWORKS[chainId];
-    if (network === undefined) {
-      throw new Error(`unsupported network ${chainId}`);
-    }
+    const { chainId, network } = await init();
 
     const domain = {
       name: "Gnosis Protocol",
@@ -72,20 +186,7 @@ document.querySelector("#sign").addEventListener(
       chainId,
       verifyingContract: "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
     };
-    const order = {
-      sellToken: document.querySelector("#sellToken").value,
-      buyToken: document.querySelector("#buyToken").value,
-      receiver: document.querySelector("#receiver").value,
-      sellAmount: document.querySelector("#sellAmount").value,
-      buyAmount: document.querySelector("#buyAmount").value,
-      validTo: parseInt(document.querySelector("#validTo").value),
-      appData: document.querySelector("#appData").value,
-      feeAmount: document.querySelector("#feeAmount").value,
-      kind: document.querySelector("#kind").value,
-      partiallyFillable: document.querySelector("#partiallyFillable").checked,
-      sellTokenBalance: document.querySelector("#sellTokenBalance").value,
-      buyTokenBalance: document.querySelector("#buyTokenBalance").value,
-    };
+    const order = readOrder();
     const signingScheme = document.querySelector("#signingScheme").value;
 
     let signature;
@@ -114,7 +215,7 @@ document.querySelector("#sign").addEventListener(
     }
 
     const response = await fetch(
-      orderbookUrl(network),
+      orderbookUrl(network, "v1/orders"),
       {
         method: "POST",
         headers: {
@@ -138,6 +239,8 @@ document.querySelector("#sign").addEventListener(
       await settlement.setPreSignature(orderUid, true);
     }
 
-    alert(`https://protocol-explorer.dev.gnosisdev.com/orders/${orderUid}`);
+    // TODO(nlordell): Fix this link (`barn` should be added based on orderbook
+    // URL and network needs to be included in path for Rinkeby and GChain).
+    alert(`https://barn.explorer.cow.fi/orders/${orderUid}`);
   }),
 );

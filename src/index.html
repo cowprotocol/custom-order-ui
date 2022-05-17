@@ -5,97 +5,124 @@
 
     <title>Custom Order</title>
     <style>
+      #order .group {
+        margin-bottom: 0.2rem;
+      }
       #order label {
         display: inline-block;
-        width: 10em;
+        width: 11rem;
+        vertical-align: middle;
       }
-      #order input[type=text] {
-        display: inline-block;
-        box-sizing: border-box;
-        width: 42em;
-      }
+      #order input[type=text],
       #order select {
+        font-family: monospace;
         display: inline-block;
         box-sizing: border-box;
-        width: 42em;
+        height: 1.75rem;
+        width: 35rem;
+        vertical-align: middle;
       }
-      #sign {
-        margin-top: 1em;
-        margin-left: 48em;
-        width: 6.4em;
+      #order input[type=checkbox] {
+        height: 1.75rem;
+        display: inline-block;
+        box-sizing: border-box;
+        margin: 0;
+        vertical-align: middle;
+      }
+      #actions {
+        margin-top: 1rem;
+        box-sizing: border-box;
+        width: 46rem;
+      }
+      #order button {
+        font-family: monospace;
+        width: 1.4rem;
+        height: 1.6rem;
+      }
+      #actions button {
+        float: right;
+        margin-left: 1rem;
+        height: 1.75rem;
+        width: 6.4rem;
       }
     </style>
   </head>
 
   <body>
     <form id="order">
-      <div>
-        <label for="sellToken">Sell Token</label>
-        <input type="text" id="sellToken" value="0x0000000000000000000000000000000000000000">
+      <div class="group">
+        <label for="sellToken">Sell Token</label><!--
+     --><input type="text" id="sellToken" value="0x0000000000000000000000000000000000000000">
       </div>
-      <div>
-        <label for="buyToken">Buy Token</label>
-        <input type="text" id="buyToken" value="0x0000000000000000000000000000000000000000">
+      <div class="group">
+        <label for="buyToken">Buy Token</label><!--
+     --><input type="text" id="buyToken" value="0x0000000000000000000000000000000000000000">
       </div>
-      <div>
-        <label for="receiver">Receiver</label>
-        <input type="text" id="receiver" value="0x0000000000000000000000000000000000000000">
+      <div class="group">
+        <label for="receiver">Receiver</label><!--
+     --><input type="text" id="receiver" value="0x0000000000000000000000000000000000000000">
       </div>
-      <div>
-        <label for="sellAmount">Sell Amount</label>
-        <input type="text" id="sellAmount" value="1234567890">
+      <div class="group">
+        <label for="sellAmount">Sell Amount</label><!--
+     --><input type="text" id="sellAmount" value="0">
       </div>
-      <div>
-        <label for="buyAmount">BuyAmount</label>
-        <input type="text" id="buyAmount" value="1234567890">
+      <div class="group">
+        <label for="buyAmount">Buy Amount</label><!--
+     --><input type="text" id="buyAmount" value="0">
       </div>
-      <div>
-        <label for="validTo">Valid To</label>
-        <input type="text" id="validTo" value="2147483648">
+      <div class="group">
+        <label for="validTo">Valid To</label><!--
+     --><input type="text" id="validTo" value="0">
+        <button type="button" id="nowish">&#x29d6;</button>
       </div>
-      <div>
-        <label for="appData">App Data</label>
-        <input type="text" id="appData" value="0x0000000000000000000000000000000000000000000000000000000000000000">
+      <div class="group">
+        <label for="appData">App Data</label><!--
+     --><input type="text" id="appData" value="0x0000000000000000000000000000000000000000000000000000000000000000">
+        <button type="button" id="randapp">&#x21ba;</button>
       </div>
-      <div>
-        <label for="feeAmount">Fee Amount</label>
-        <input type="text" id="feeAmount" value="1234567890">
+      <div class="group">
+        <label for="feeAmount">Fee Amount</label><!--
+     --><input type="text" id="feeAmount" value="0">
       </div>
-      <div>
-        <label for="kind">Kind</label>
-        <select id="kind">
+      <div class="group">
+        <label for="kind">Kind</label><!--
+     --><select id="kind">
           <option value="sell" selected>sell</option>
           <option value="buy">buy</option>
         </select>
       </div>
-      <div>
-        <label for="partiallyFillable">Partially Fillable</label>
-        <input type="checkbox" id="partiallyFillable" value=false>
+      <div class="group">
+        <label for="partiallyFillable">Partially Fillable</label><!--
+     --><input type="checkbox" id="partiallyFillable" value=false>
       </div>
-      <div>
-        <label for="sellTokenBalance">Sell Token Balance</label>
-        <select id="sellTokenBalance">
+      <div class="group">
+        <label for="sellTokenBalance">Sell Token Balance</label><!--
+     --><select id="sellTokenBalance">
           <option value="erc20" selected>erc20</option>
           <option value="external">external</option>
           <option value="internal">internal</option>
         </select>
       </div>
-      <div>
-        <label for="buyTokenBalance">Sell Token Balance</label>
-        <select id="buyTokenBalance">
+      <div class="group">
+        <label for="buyTokenBalance">Sell Token Balance</label><!--
+     --><select id="buyTokenBalance">
           <option value="erc20" selected>erc20</option>
           <option value="internal">internal</option>
         </select>
       </div>
-      <div>
-        <label for="signingScheme">Signing Scheme</label>
-        <select id="signingScheme">
+      <div class="group">
+        <label for="signingScheme">Signing Scheme</label><!--
+     --><select id="signingScheme">
           <option value="eip712" selected>eip712</option>
           <option value="ethsign">ethsign</option>
           <option value="presign">presign</option>
         </select>
       </div>
-      <input type="button" id="sign" value="Sign">
+
+      <div id="actions">
+        <button type="button" id="sign">Sign</button>
+        <button type="button" id="quote">Quote</button>
+      </div>
     </form>
 
     <script data-src="index.js">
