@@ -88,6 +88,7 @@ const ORDER_TYPE = [
 const NETWORKS = {
   1: "mainnet",
   4: "rinkeby",
+  5: "goerli",
   100: "xdai",
 };
 
@@ -215,6 +216,9 @@ document.querySelector("#sign").addEventListener(
         break;
     }
 
+    const quoteIdValue = document.querySelector("#quoteId").value;
+    const quoteId = quoteIdValue === "" ? null : parseInt(quoteIdValue);
+
     const response = await fetch(
       orderbookUrl(network, "v1/orders"),
       {
@@ -226,8 +230,8 @@ document.querySelector("#sign").addEventListener(
           ...order,
           signature,
           signingScheme,
+          quoteId,
           from: await signer.getAddress(),
-          quoteId: parseInt(document.querySelector("#quoteId").value),
         }),
       },
     );
