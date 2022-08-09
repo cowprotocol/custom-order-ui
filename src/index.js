@@ -168,10 +168,11 @@ document.querySelector("#quote").addEventListener(
       throw new Error(body.description);
     }
 
-    const { quote } = body;
+    const { quote, id } = body;
     document.querySelector("#sellAmount").value = quote.sellAmount;
     document.querySelector("#buyAmount").value = quote.buyAmount;
     document.querySelector("#feeAmount").value = quote.feeAmount;
+    document.querySelector("#quoteId").value = id;
   }),
 );
 
@@ -226,6 +227,7 @@ document.querySelector("#sign").addEventListener(
           signature,
           signingScheme,
           from: await signer.getAddress(),
+          quoteId: parseInt(document.querySelector("#quoteId").value),
         }),
       },
     );
