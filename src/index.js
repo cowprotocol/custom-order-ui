@@ -127,11 +127,13 @@ document.querySelector("#approve").addEventListener(
 
     const vaultRelayer = await settlement.vaultRelayer();
     const from = await signer.getAddress();
-    const { sellToken, sellAmount } = readOrder();
+    const { sellToken, sellAmount, feeAmount } = readOrder();
 
     const token = erc20(sellToken);
     const allowance = await token.allowance(from, vaultRelayer);
-    if (allowance.gt(sellAmount)) {
+    if (
+      !allowance.isZero() && allowance.sub(sellAmount).sub(feeAmount).gte(0)
+    ) {
       alert("allowance already set");
       return;
     }
