@@ -5,10 +5,23 @@ const signer = provider.getSigner();
 const settlement = new ethers.Contract(
   "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
   [
+    "function vaultRelayer() view returns (address)",
     "function setPreSignature(bytes orderUid, bool signed)",
   ],
   signer,
 );
+
+function erc20(address) {
+  return new ethers.Contract(
+    address,
+    [
+      "function allowance(address, address) view returns (uint256)",
+      "function balanceOf(address) view returns (uint256)",
+      "function approve(address, uint256)",
+    ],
+    signer,
+  );
+}
 
 function handleError(inner) {
   return () =>
@@ -106,6 +119,28 @@ async function init() {
     network,
   };
 }
+
+document.querySelector("#approve").addEventListener(
+  "click",
+  handleError(async () => {
+    await init();
+
+    const vaultRelayer = await settlement.vaultRelayer();
+    const from = await signer.getAddress();
+    const { sellToken, sellAmount, feeAmount } = readOrder();
+
+    const token = erc20(sellToken);
+    const allowance = await token.allowance(from, vaultRelayer);
+    if (
+      !allowance.isZero() && allowance.sub(sellAmount).sub(feeAmount).gte(0)
+    ) {
+      alert("allowance already set");
+      return;
+    }
+
+    await token.approve(vaultRelayer, ethers.constants.MaxUint256);
+  }),
+);
 
 document.querySelector("#nowish").addEventListener(
   "click",
@@ -247,6 +282,11 @@ document.querySelector("#sign").addEventListener(
 
     // TODO(nlordell): Fix this link (`barn` should be added based on orderbook
     // URL and network needs to be included in path for Rinkeby and GChain).
-    alert(`https://barn.explorer.cow.fi/orders/${orderUid}`);
+    const url = `https://barn.explorer.cow.fi/orders/${orderUid}`;
+
+    // Additionally log to console. This facilitates copy-pasting the URL in
+    // browsers where the alert box text can't be selected.
+    console.info(url);
+    alert(url);
   }),
 );
