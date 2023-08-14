@@ -41,18 +41,31 @@ function parseQuery(q) {
   return query;
 }
 
-function orderbookUrl(network, path) {
+const KNOWN_NETWORKS = {
+  1: "mainnet",
+  5: "goerli",
+  100: "xdai",
+};
+
+function network(chainId) {
+  if (KNOWN_NETWORKS[chainId] === undefined) {
+    throw new Error(`unsupported network ${chainId}`);
+  }
+  return KNOWN_NETWORKS[chainId];
+}
+
+function orderbookUrl(chainId, path) {
   const { orderbook } = parseQuery(window.location.search);
   let baseUrl;
   switch (orderbook || "barn") {
     case "prod":
     case "production":
-      baseUrl = `https://api.cow.fi/${network}`;
+      baseUrl = `https://api.cow.fi/${network(chainId)}`;
       break;
     case "barn":
     case "dev":
     case "staging":
-      baseUrl = `https://barn.api.cow.fi/${network}`;
+      baseUrl = `https://barn.api.cow.fi/${network(chainId)}`;
       break;
     case "local":
     case "localhost":
@@ -98,25 +111,13 @@ const ORDER_TYPE = [
   { name: "buyTokenBalance", type: "string" },
 ];
 
-const NETWORKS = {
-  1: "mainnet",
-  4: "rinkeby",
-  5: "goerli",
-  100: "xdai",
-};
-
 async function init() {
   await ethereum.request({ method: "eth_requestAccounts" });
 
   const { chainId } = await provider.getNetwork();
-  const network = NETWORKS[chainId];
-  if (network === undefined) {
-    throw new Error(`unsupported network ${chainId}`);
-  }
 
   return {
     chainId,
-    network,
   };
 }
 
@@ -168,7 +169,7 @@ document.querySelector("#randapp").addEventListener(
 document.querySelector("#quote").addEventListener(
   "click",
   handleError(async () => {
-    const { network } = await init();
+    const { chainId } = await init();
 
     const { sellAmount, buyAmount, feeAmount, ...order } = readOrder();
     let swapAmount;
@@ -187,7 +188,7 @@ document.querySelector("#quote").addEventListener(
         throw new Error(`unsupported order kind ${order.kind}`);
     }
 
-    const response = await fetch(orderbookUrl(network, "v1/quote"), {
+    const response = await fetch(orderbookUrl(chainId, "v1/quote"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -215,7 +216,7 @@ document.querySelector("#quote").addEventListener(
 document.querySelector("#sign").addEventListener(
   "click",
   handleError(async () => {
-    const { chainId, network } = await init();
+    const { chainId } = await init();
 
     const domain = {
       name: "Gnosis Protocol",
@@ -255,7 +256,7 @@ document.querySelector("#sign").addEventListener(
     const quoteId = quoteIdValue === "" ? null : parseInt(quoteIdValue);
 
     const response = await fetch(
-      orderbookUrl(network, "v1/orders"),
+      orderbookUrl(chainId, "v1/orders"),
       {
         method: "POST",
         headers: {
