@@ -92,7 +92,7 @@ function readOrder() {
     buyAmount: document.querySelector("#buyAmount").value,
     validTo: parseInt(document.querySelector("#validTo").value),
     appData: document.querySelector("#appData").value,
-    feeAmount: document.querySelector("#feeAmount").value,
+    feeAmount: "0",
     kind: document.querySelector("#kind").value,
     partiallyFillable: document.querySelector("#partiallyFillable").checked,
     sellTokenBalance: document.querySelector("#sellTokenBalance").value,
@@ -132,12 +132,12 @@ document.querySelector("#approve").addEventListener(
 
     const vaultRelayer = await settlement.vaultRelayer();
     const from = await signer.getAddress();
-    const { sellToken, sellAmount, feeAmount } = readOrder();
+    const { sellToken, sellAmount } = readOrder();
 
     const token = erc20(sellToken);
     const allowance = await token.allowance(from, vaultRelayer);
     if (
-      !allowance.isZero() && allowance.sub(sellAmount).sub(feeAmount).gte(0)
+      !allowance.isZero() && allowance.sub(sellAmount).gte(0)
     ) {
       alert("allowance already set");
       return;
@@ -175,12 +175,12 @@ document.querySelector("#quote").addEventListener(
   handleError(async () => {
     const { chainId } = await init();
 
-    const { sellAmount, buyAmount, feeAmount, ...order } = readOrder();
+    const { sellAmount, buyAmount, ...order } = readOrder();
     let swapAmount;
     switch (order.kind) {
       case "sell":
         swapAmount = {
-          sellAmountBeforeFee: `${BigInt(sellAmount) + BigInt(feeAmount)}`,
+          sellAmountBeforeFee: sellAmount,
         };
         break;
       case "buy":
@@ -210,9 +210,8 @@ document.querySelector("#quote").addEventListener(
     }
 
     const { quote, id } = body;
-    document.querySelector("#sellAmount").value = quote.sellAmount;
+    document.querySelector("#sellAmount").value = order.kind === "sell" ? BigInt(quote.sellAmount) + BigInt(quote.feeAmount) : quote.sellAmount;
     document.querySelector("#buyAmount").value = quote.buyAmount;
-    document.querySelector("#feeAmount").value = quote.feeAmount;
     document.querySelector("#quoteId").value = id;
   }),
 );
