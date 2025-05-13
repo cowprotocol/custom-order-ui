@@ -43,12 +43,8 @@ function parseQuery(q) {
 
 const KNOWN_NETWORKS = {
   1: "mainnet",
+  5: "goerli",
   100: "xdai",
-  8453: "base",
-  42161: "arbitrum_one",
-  137: "polygon",
-  43114: "avalanche",
-  11155111: "sepolia",
 };
 
 function network(chainId) {
