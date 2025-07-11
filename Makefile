@@ -3,7 +3,7 @@ dist/index.html: src/index.html dist/index.js
 
 dist/index.js: src/index.js src/lib/ethers.js
 	mkdir -p dist/
-	deno bundle src/index.js dist/index.js
+	deno bundle src/index.js -o dist/index.js
 
 .PHONY: host
 host: dist/index.html
