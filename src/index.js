@@ -1,5 +1,118 @@
 import { ethers } from "./lib/ethers.js";
 
+const STORAGE_KEY = "custom-order-form-state";
+const FORM_FIELDS = [
+  "sellToken",
+  "buyToken",
+  "receiver",
+  "sellAmount",
+  "buyAmount",
+  "validTo",
+  "appData",
+  "kind",
+  "partiallyFillable",
+  "sellTokenBalance",
+  "buyTokenBalance",
+  "signingScheme",
+  "quoteId",
+];
+
+const DEFAULT_FORM_STATE = {
+  sellToken: "0x0000000000000000000000000000000000000000",
+  buyToken: "0x0000000000000000000000000000000000000000",
+  receiver: "0x0000000000000000000000000000000000000000",
+  sellAmount: "0",
+  buyAmount: "0",
+  validTo: "0",
+  appData: "0x0000000000000000000000000000000000000000000000000000000000000000",
+  kind: "sell",
+  partiallyFillable: false,
+  sellTokenBalance: "erc20",
+  buyTokenBalance: "erc20",
+  signingScheme: "eip712",
+  quoteId: "",
+};
+
+function fieldElement(id) {
+  return document.querySelector(`#${id}`);
+}
+
+function applyFormState(state) {
+  for (const id of FORM_FIELDS) {
+    if (!(id in state)) {
+      continue;
+    }
+    const element = fieldElement(id);
+    if (!element) {
+      continue;
+    }
+    if (element.type === "checkbox") {
+      element.checked = Boolean(state[id]);
+    } else {
+      element.value = state[id];
+    }
+  }
+}
+
+function readFormState() {
+  const state = {};
+  for (const id of FORM_FIELDS) {
+    const element = fieldElement(id);
+    if (!element) {
+      continue;
+    }
+    if (element.type === "checkbox") {
+      state[id] = element.checked;
+    } else {
+      state[id] = element.value;
+    }
+  }
+  return state;
+}
+
+function saveFormState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(readFormState()));
+  } catch (err) {
+    console.warn("Unable to persist form state", err);
+  }
+}
+
+function restoreFormState() {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    try {
+      const state = JSON.parse(stored);
+      applyFormState({ ...DEFAULT_FORM_STATE, ...state });
+      saveFormState();
+      return;
+    } catch (err) {
+      console.warn("Unable to restore form state", err);
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }
+  applyFormState(DEFAULT_FORM_STATE);
+  saveFormState();
+}
+
+function clearFormState() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (err) {
+    console.warn("Unable to clear form state", err);
+  }
+}
+
+restoreFormState();
+
+for (const element of document.querySelectorAll("#order input, #order select")) {
+  const eventName = element.type === "checkbox" || element.tagName === "SELECT" ? "change" : "input";
+  element.addEventListener(eventName, saveFormState);
+  if (eventName !== "change") {
+    element.addEventListener("change", saveFormState);
+  }
+}
+
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 const signer = provider.getSigner();
 const settlement = new ethers.Contract(
@@ -43,11 +156,13 @@ function parseQuery(q) {
 
 const KNOWN_NETWORKS = {
   1: "mainnet",
+  56: "bnb",
   100: "xdai",
   8453: "base",
   42161: "arbitrum_one",
   137: "polygon",
   43114: "avalanche",
+  59144: "linea",
   11155111: "sepolia",
 };
 
@@ -154,6 +269,7 @@ document.querySelector("#nowish").addEventListener(
     const nowish = now + 20 * 60; // 20 minutes expiry
 
     document.querySelector("#validTo").value = `${nowish}`;
+    saveFormState();
   }),
 );
 
@@ -167,6 +283,7 @@ document.querySelector("#randapp").addEventListener(
       .join("");
 
     document.querySelector("#appData").value = `0x${hex}`;
+    saveFormState();
   }),
 );
 
@@ -213,7 +330,17 @@ document.querySelector("#quote").addEventListener(
     document.querySelector("#sellAmount").value = order.kind === "sell" ? BigInt(quote.sellAmount) + BigInt(quote.feeAmount) : quote.sellAmount;
     document.querySelector("#buyAmount").value = quote.buyAmount;
     document.querySelector("#quoteId").value = id;
+    saveFormState();
   }),
+);
+
+document.querySelector("#reset").addEventListener(
+  "click",
+  () => {
+    clearFormState();
+    applyFormState(DEFAULT_FORM_STATE);
+    saveFormState();
+  },
 );
 
 document.querySelector("#sign").addEventListener(
