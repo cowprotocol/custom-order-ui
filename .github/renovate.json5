@@ -8,19 +8,12 @@
   packageRules: [
     {
       matchManagers: ["github-actions"],
-      // weekly, on mondays
       schedule: ["on monday"],
-      // skip releases newer than 2 weeks to avoid picking up freshly
-      // published versions that may be unstable or compromised
       minimumReleaseAge: "14 days",
       // coerced variant so short tags like `v3` / `v1.7` (which several
       // actions only publish) still parse instead of silently stopping updates
       versioning: "semver-coerced",
-      // pin to full commit SHAs (semver tag as a trailing comment) rather
-      // than mutable tags
       pinDigests: true,
-      // when both major and minor releases exist, propose only the latest
-      // bump instead of a separate minor PR
       separateMajorMinor: false,
       semanticCommitScope: "{{depName}}",
       commitMessageTopic: "{{depName}}",
