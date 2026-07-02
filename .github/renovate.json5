@@ -1,0 +1,22 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  // Disable every built-in manager (npm, dockerfile, ...) except github-actions.
+  enabledManagers: ["github-actions"],
+  // PR titles use Conventional Commits: `deps(<action>): ...`
+  semanticCommits: "enabled",
+  semanticCommitType: "deps",
+  packageRules: [
+    {
+      matchManagers: ["github-actions"],
+      schedule: ["on monday"],
+      minimumReleaseAge: "14 days",
+      // coerced variant so short tags like `v3` / `v1.7` (which several
+      // actions only publish) still parse instead of silently stopping updates
+      versioning: "semver-coerced",
+      pinDigests: true,
+      separateMajorMinor: false,
+      semanticCommitScope: "{{depName}}",
+      commitMessageTopic: "{{depName}}",
+    },
+  ],
+}
