@@ -8,7 +8,7 @@
   packageRules: [
     {
       matchManagers: ["github-actions"],
-      schedule: ["on monday"],
+      schedule: ["* 0-3 1 * *"],
       minimumReleaseAge: "14 days",
       // coerced variant so short tags like `v3` / `v1.7` (which several
       // actions only publish) still parse instead of silently stopping updates
